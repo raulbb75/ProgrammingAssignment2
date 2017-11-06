@@ -1,36 +1,75 @@
-## Put comments here that give an overall description of what your
-## functions do
 
-## makeCacheMatrix function
-
-makeCacheMatrix <- function(x = matrix()) {
-invrs <- NULL
-set <- function(y) {
-x <- y
-invrs <- NULL
+makeCacheMatrix <- function(x = matrix()) { # receives matrix x
+      s <- NULL           # initialize inverse matrix object s as a placeholder for future use
+    set <- function(y) {  # defines a function to set matrix x, ....
+      x <<- y             # to a new matrix y,....
+      s <<- NULL          # and resets the inverse matrix object s to NULL, x and y are stored outside this environment via <<- operator
+    }
+    get <- function() x   # returns matrix x
+    setinverse <- function(solve) s <<- solve # get inverse matrix 's' from cache called solve 
+    getinverse <- function() s # returns object 's'
+    list(set = set, get = get,   # list of arguments
+         setinverse = setinverse, # continued ..
+         getinverse = getinverse) # end of list
 }
-get <- function() x
-setinverse <- function(inverse) invrs <- inverse
-getinverse <- function() invrs
-list(set = set, get = get,
-setinverse = setinverse,
-getinverse = getinverse)
   
+cacheSolve <- function(x, ...) {  # function receives matrix x and is stored in variable 'cachesolve' 
+  s <- x$getinverse()   # call getinverse function on matrix x and store result in s
+  if(!is.null(s)) {     # Is a cached version of x available from s ?
+    message("getting cached data") # if so return a message
+    return(s)           # ....and cached object
+  }                     # else: previously not cached - cache empty
+  data <- x$get()       # call get functon on matrix 'x' and store it as variable data
+  s <- solve(data, ...) # set s as a variable to hold the inverse matrix, resulting from solve function on 'data'
+  x$setinverse(s)       # set the inverse matrix of x in s
+  s                     # return inverse matrix of x
 }
 
-
-## cacheSolve funcion
-
-cacheSolve <- function(x, ...) {
-invrs <= x$getinverse()
-if(!is.null(invrs)) {
-message("getting cached data")
-return(invrs)
-}
-mat <- x$get()
-invrs <- solve(mat, ...)
-x$setinverse(invrs)
-invrs
-}
+# # Run test
+# 
+# # Create 2x2 matrix of 4 random numbers
+# > # Run test
+#   > 
+#   > # Create 2x2 matrix of 4 random numbers
+#   > my_matrix <- matrix(runif(4),2,2)
+# > my_matrix
+# [,1]        [,2]
+# [1,] 0.5765377 0.003652904
+# [2,] 0.6890518 0.797181142
 
 
+# > CacheMatrix <- makeCacheMatrix(my_matrix)
+# > CacheMatrix
+# $set
+# function (y) 
+# {
+#   x <<- y
+#   s <<- NULL
+# }
+# <environment: 0x0000000004988b18>
+#   
+#   $get
+# function () 
+#   x
+# <environment: 0x0000000004988b18>
+#   
+#   $setinverse
+# function (solve) 
+#   s <<- solve
+# <environment: 0x0000000004988b18>
+#   
+#   $getinverse
+# function () 
+#   s
+# <environment: 0x0000000004988b18>
+#   
+#   > 
+#   > CacheMatrix$get()
+# [,1]        [,2]
+# [1,] 0.5765377 0.003652904
+# [2,] 0.6890518 0.797181142
+# > 
+#   > 
+#   > CacheMatrix$getinverse()
+# NULL
+# > 
